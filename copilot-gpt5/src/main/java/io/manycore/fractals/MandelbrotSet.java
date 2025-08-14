@@ -27,13 +27,16 @@ public class MandelbrotSet {
     }
 
     public void drawFractal() {
-        // Use parallel streams to process rows in parallel
+        // Compute all pixels in parallel into a linear buffer to avoid concurrent writes to the image
+        final int[] pixels = new int[width * height];
+
         IntStream.range(0, height).parallel().forEach(y -> {
+            int rowOffset = y * width;
+            double cY = (y - (height / 2.0)) / zoom;
             for (int x = 0; x < width; x++) {
                 double zx = 0;
                 double zy = 0;
                 double cX = (x - (width / 2.0)) / zoom;
-                double cY = (y - (height / 2.0)) / zoom;
                 int iter = maxIter;
                 while (zx * zx + zy * zy < 4 && iter > 0) {
                     double tmp = zx * zx - zy * zy + cX;
@@ -41,9 +44,12 @@ public class MandelbrotSet {
                     zx = tmp;
                     iter--;
                 }
-                image.setRGB(x, y, iter | (iter << 8));
+                pixels[rowOffset + x] = iter | (iter << 8);
             }
         });
+
+        // Single bulk copy into the BufferedImage
+        image.setRGB(0, 0, width, height, pixels, 0, width);
     }
 
     public void saveImage(String filename) {

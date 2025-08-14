@@ -5,7 +5,6 @@ import io.manycore.magicator.Debug;
 import javax.swing.JFrame;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.Serial;
 
 public class MandelbrotAnim extends JFrame {
 
